@@ -1,0 +1,12 @@
+# Web Application Dependencies
+Flask==2.3.3
+Werkzeug==2.3.7
+requests==2.31.0
+
+# No external dependencies required for core functionality
+# This project uses only Python standard library modules:
+# - json: For JSON file operations
+# - os: For filesystem operations
+# - datetime: For timestamp generation
+# - sys: For system operations
+# - argparse: For command-line argument parsing 

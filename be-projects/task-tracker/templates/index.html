@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Task Tracker - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-white mb-0" style="font-size:2.5rem; font-weight:700; letter-spacing:1px;">
+                <i class="fas fa-tasks me-2"></i>My Tasks
+            </h1>
+            <a href="{{ url_for('add_task') }}" class="btn btn-primary btn-action shadow">
+                <i class="fas fa-plus me-2"></i>New Task
+            </a>
+        </div>
+
+        <!-- Statistics -->
+        <div class="row mb-4 g-3">
+            <div class="col-6 col-md-3">
+                <div class="stats-card text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="mb-2" style="font-size:2.2rem;"><i class="fas fa-clock"></i></div>
+                    <h4>{{ tasks|selectattr('status', 'equalto', 'todo')|list|length }}</h4>
+                    <div class="fw-semibold">Pending</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stats-card text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="mb-2" style="font-size:2.2rem;"><i class="fas fa-spinner"></i></div>
+                    <h4>{{ tasks|selectattr('status', 'equalto', 'in-progress')|list|length }}</h4>
+                    <div class="fw-semibold">In Progress</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stats-card text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="mb-2" style="font-size:2.2rem;"><i class="fas fa-check-circle"></i></div>
+                    <h4>{{ tasks|selectattr('status', 'equalto', 'done')|list|length }}</h4>
+                    <div class="fw-semibold">Completed</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stats-card text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="mb-2" style="font-size:2.2rem;"><i class="fas fa-list"></i></div>
+                    <h4>{{ tasks|length }}</h4>
+                    <div class="fw-semibold">Total</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="card mb-4 p-3" style="background:rgba(255,255,255,0.85);">
+            <div class="card-body p-2">
+                <h5 class="card-title mb-3 fw-bold text-primary">
+                    <i class="fas fa-filter me-2"></i>Filter
+                </h5>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('index') }}" 
+                       class="btn btn-outline-primary filter-btn {{ 'active' if not current_filter else '' }}">
+                        <i class="fas fa-list me-1"></i>All
+                    </a>
+                    <a href="{{ url_for('filter_tasks', status='todo') }}" 
+                       class="btn btn-outline-warning filter-btn {{ 'active' if current_filter == 'todo' else '' }}">
+                        <i class="fas fa-clock me-1"></i>Pending
+                    </a>
+                    <a href="{{ url_for('filter_tasks', status='in-progress') }}" 
+                       class="btn btn-outline-info filter-btn {{ 'active' if current_filter == 'in-progress' else '' }}">
+                        <i class="fas fa-spinner me-1"></i>In Progress
+                    </a>
+                    <a href="{{ url_for('filter_tasks', status='done') }}" 
+                       class="btn btn-outline-success filter-btn {{ 'active' if current_filter == 'done' else '' }}">
+                        <i class="fas fa-check me-1"></i>Completed
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks List -->
+        {% if tasks %}
+            <div class="row g-4">
+                {% for task in tasks %}
+                <div class="col-12">
+                    <div class="card task-card {{ task.status }} shadow-sm">
+                        <div class="card-body py-4 px-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 mb-2 mb-md-0">
+                                    <h5 class="card-title mb-2 fw-bold" style="font-size:1.3rem;">
+                                        <i class="fas fa-{{ 'clock' if task.status == 'todo' else 'spinner' if task.status == 'in-progress' else 'check-circle' }} me-2"></i>
+                                        {{ task.description }}
+                                    </h5>
+                                    <div class="d-flex align-items-center mt-2">
+                                        <span class="status-badge status-{{ task.status.replace('-', '-') }} me-3">
+                                            {% if task.status == 'todo' %}
+                                                <i class="fas fa-clock me-1"></i>Pending
+                                            {% elif task.status == 'in-progress' %}
+                                                <i class="fas fa-spinner me-1"></i>In Progress
+                                            {% else %}
+                                                <i class="fas fa-check me-1"></i>Completed
+                                            {% endif %}
+                                        </span>
+                                        <small class="text-muted ms-2">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ task.createdAt.split('T')[0] }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                        <!-- Status Change Buttons -->
+                                        {% if task.status != 'todo' %}
+                                        <form method="POST" action="{{ url_for('change_status', task_id=task.id, status='todo') }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-warning btn-action" title="Mark as pending">
+                                                <i class="fas fa-clock"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        
+                                        {% if task.status != 'in-progress' %}
+                                        <form method="POST" action="{{ url_for('change_status', task_id=task.id, status='in-progress') }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-info btn-action" title="Mark as in progress">
+                                                <i class="fas fa-spinner"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        
+                                        {% if task.status != 'done' %}
+                                        <form method="POST" action="{{ url_for('change_status', task_id=task.id, status='done') }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-success btn-action" title="Mark as completed">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+
+                                        <!-- Edit Button -->
+                                        <a href="{{ url_for('edit_task', task_id=task.id) }}" 
+                                           class="btn btn-primary btn-action" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        <!-- Delete Button -->
+                                        <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" 
+                                              style="display: inline;" 
+                                              onsubmit="return confirmDelete({{ task.id }}, '{{ task.description }}')">
+                                            <button type="submit" class="btn btn-danger btn-action" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="card">
+                <div class="card-body empty-state">
+                    <i class="fas fa-tasks"></i>
+                    <h4>No tasks yet</h4>
+                    <p class="mb-4">Start by adding your first task!</p>
+                    <a href="{{ url_for('add_task') }}" class="btn btn-primary btn-action">
+                        <i class="fas fa-plus me-2"></i>Add First Task
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
