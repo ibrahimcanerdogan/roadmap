@@ -1,0 +1,659 @@
+{% extends "base.html" %}
+
+{% block title %}Compare GitHub Users{% endblock %}
+
+{% block content %}
+<div class="compare-page">
+    <!-- Compare Header -->
+    <div class="compare-header">
+        <div class="compare-header-container">
+            <h1 class="compare-title">
+                <span class="title-icon">📊</span>
+                Compare GitHub Users
+            </h1>
+            <p class="compare-subtitle">Compare activity, statistics, and trends between multiple GitHub users</p>
+        </div>
+    </div>
+
+    <!-- Compare Form -->
+    <div class="compare-form-section">
+        <div class="compare-form-container">
+            <form id="compareForm" class="compare-form">
+                <div class="form-group">
+                    <label for="usernames" class="form-label">
+                        <span class="label-icon">👥</span>
+                        GitHub Usernames (2-5 users)
+                    </label>
+                    <div class="username-inputs">
+                        <div class="username-input-group">
+                            <input type="text" name="username1" id="username1" placeholder="First username" class="username-input" required>
+                            <button type="button" class="remove-user-btn" onclick="removeUser(this)" style="display: none;">×</button>
+                        </div>
+                        <div class="username-input-group">
+                            <input type="text" name="username2" id="username2" placeholder="Second username" class="username-input" required>
+                            <button type="button" class="remove-user-btn" onclick="removeUser(this)" style="display: none;">×</button>
+                        </div>
+                    </div>
+                    <button type="button" id="addUserBtn" class="add-user-btn">
+                        <span class="add-icon">+</span>
+                        Add Another User
+                    </button>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="compare-btn" id="compareBtn">
+                        <span class="btn-text">Compare Users</span>
+                        <span class="btn-icon">📊</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-state" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Fetching user data...</p>
+    </div>
+
+    <!-- Compare Results -->
+    <div id="compareResults" class="compare-results" style="display: none;">
+        <div class="results-container">
+            <!-- User Cards -->
+            <div class="user-cards-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="section-icon">👥</span>
+                        User Profiles
+                    </h2>
+                    <p class="section-description">Overview of compared users and their basic information</p>
+                </div>
+                <div id="userCards" class="user-cards">
+                    <!-- User cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Activity Comparison -->
+            <div class="activity-comparison-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="section-icon">📈</span>
+                        Activity Comparison
+                    </h2>
+                    <p class="section-description">Visual comparison of user activities and contributions</p>
+                </div>
+                <div class="comparison-charts">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <span class="chart-icon">📊</span>
+                                Total Events
+                            </h3>
+                            <p class="chart-subtitle">Overall activity level comparison</p>
+                        </div>
+                        <div id="totalEventsChart" class="chart"></div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <span class="chart-icon">🎯</span>
+                                Event Types Distribution
+                            </h3>
+                            <p class="chart-subtitle">Breakdown of different activity types</p>
+                        </div>
+                        <div id="eventTypesChart" class="chart"></div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <span class="chart-icon">📁</span>
+                                Most Active Repositories
+                            </h3>
+                            <p class="chart-subtitle">Top repositories by activity</p>
+                        </div>
+                        <div id="repositoriesChart" class="chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Statistics -->
+            <div class="detailed-stats-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="section-icon">📋</span>
+                        Detailed Statistics
+                    </h2>
+                    <p class="section-description">In-depth analysis of user patterns and preferences</p>
+                </div>
+                <div id="detailedStats" class="detailed-stats">
+                    <!-- Detailed stats will be populated here -->
+                </div>
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="timeline-comparison-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="section-icon">⏰</span>
+                        Activity Timeline
+                    </h2>
+                    <p class="section-description">Chronological view of all user activities</p>
+                </div>
+                <div class="timeline-filters">
+                    <label for="timelineFilter" class="filter-label">Filter by Event Type:</label>
+                    <select id="timelineFilter" class="timeline-filter">
+                        <option value="all">All Events</option>
+                        <option value="PushEvent">🚀 Push Events</option>
+                        <option value="IssuesEvent">🐛 Issues</option>
+                        <option value="PullRequestEvent">🔀 Pull Requests</option>
+                        <option value="WatchEvent">⭐ Stars</option>
+                        <option value="CreateEvent">✨ Creates</option>
+                        <option value="ForkEvent">🍴 Forks</option>
+                    </select>
+                </div>
+                <div id="timelineComparison" class="timeline-comparison">
+                    <!-- Timeline will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="error-state" style="display: none;">
+        <div class="error-icon">⚠️</div>
+        <h3 class="error-title">Comparison Failed</h3>
+        <p id="errorMessage" class="error-message"></p>
+        <button onclick="resetComparison()" class="retry-btn">
+            <span class="retry-icon">🔄</span>
+            Try Again
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentUsers = 2;
+let comparisonData = {};
+
+// Initialize comparison form
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCompareForm();
+    setupTimelineFilter();
+});
+
+function initializeCompareForm() {
+    const form = document.getElementById('compareForm');
+    const addUserBtn = document.getElementById('addUserBtn');
+    
+    form.addEventListener('submit', handleCompareSubmit);
+    addUserBtn.addEventListener('click', addUserInput);
+}
+
+function setupTimelineFilter() {
+    const filter = document.getElementById('timelineFilter');
+    filter.addEventListener('change', function() {
+        if (comparisonData && Object.keys(comparisonData).length > 0) {
+            displayTimelineComparison(comparisonData);
+        }
+    });
+}
+
+function addUserInput() {
+    if (currentUsers >= 5) {
+        showNotification('Maximum 5 users can be compared', 'warning');
+        return;
+    }
+    
+    currentUsers++;
+    const usernameInputs = document.querySelector('.username-inputs');
+    const newInputGroup = document.createElement('div');
+    newInputGroup.className = 'username-input-group';
+    newInputGroup.innerHTML = `
+        <input type="text" name="username${currentUsers}" id="username${currentUsers}" 
+               placeholder="Username ${currentUsers}" class="username-input" required>
+        <button type="button" class="remove-user-btn" onclick="removeUser(this)">×</button>
+    `;
+    
+    usernameInputs.appendChild(newInputGroup);
+    
+    if (currentUsers >= 5) {
+        document.getElementById('addUserBtn').style.display = 'none';
+    }
+}
+
+function removeUser(button) {
+    const inputGroup = button.parentElement;
+    const input = inputGroup.querySelector('input');
+    
+    // Clear the input
+    input.value = '';
+    input.required = false;
+    
+    // Hide the input group
+    inputGroup.style.display = 'none';
+    
+    // Show add user button if we're below max
+    if (currentUsers > 2) {
+        document.getElementById('addUserBtn').style.display = 'block';
+    }
+}
+
+async function handleCompareSubmit(e) {
+    e.preventDefault();
+    
+    // Get usernames
+    const usernames = [];
+    for (let i = 1; i <= currentUsers; i++) {
+        const input = document.getElementById(`username${i}`);
+        if (input && input.value.trim()) {
+            usernames.push(input.value.trim());
+        }
+    }
+    
+    if (usernames.length < 2) {
+        showNotification('Please provide at least 2 usernames', 'error');
+        return;
+    }
+    
+    // Show loading state
+    showLoadingState();
+    
+    try {
+        const response = await fetch('/api/compare', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ usernames: usernames })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Validate that we have the expected data structure
+            if (!data || typeof data !== 'object') {
+                throw new Error('Invalid response format from server');
+            }
+            
+            // Check if all users have the required data
+            const missingData = usernames.filter(username => !data[username]);
+            if (missingData.length > 0) {
+                throw new Error(`Failed to fetch data for: ${missingData.join(', ')}`);
+            }
+            
+            comparisonData = data;
+            displayComparisonResults(data);
+            showNotification('Comparison completed successfully!', 'success');
+        } else {
+            throw new Error(data.error || 'Failed to compare users');
+        }
+    } catch (error) {
+        console.error('Comparison error:', error);
+        showErrorState(error.message);
+    }
+}
+
+function showLoadingState() {
+    document.getElementById('compareForm').style.display = 'none';
+    document.getElementById('compareResults').style.display = 'none';
+    document.getElementById('errorState').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'flex';
+}
+
+function showErrorState(message) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorState').style.display = 'flex';
+}
+
+function displayComparisonResults(data) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('compareResults').style.display = 'block';
+    
+    displayUserCards(data);
+    displayActivityCharts(data);
+    displayDetailedStats(data);
+    displayTimelineComparison(data);
+}
+
+function displayUserCards(data) {
+    const userCardsContainer = document.getElementById('userCards');
+    userCardsContainer.innerHTML = '';
+    
+    Object.entries(data).forEach(([username, userData]) => {
+        const userInfo = userData.user_info || {};
+        const stats = userData.activity_stats || {};
+        
+        const card = document.createElement('div');
+        card.className = 'user-card';
+        card.innerHTML = `
+            <div class="user-card-header">
+                <div class="user-avatar">
+                    <img src="${userInfo.avatar_url || '/static/img/default-avatar.png'}" alt="${username}" onerror="this.src='/static/img/default-avatar.png'">
+                </div>
+                <div class="user-info">
+                    <h3 class="user-name">${userInfo.name || username}</h3>
+                    <p class="user-login">@${username}</p>
+                    ${userInfo.bio ? `<p class="user-bio">${userInfo.bio}</p>` : ''}
+                </div>
+            </div>
+            <div class="user-stats">
+                <div class="stat-item">
+                    <span class="stat-number">${stats.total_events || 0}</span>
+                    <span class="stat-label">Total Events</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${userInfo.public_repos || 0}</span>
+                    <span class="stat-label">Repositories</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${userInfo.followers || 0}</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+            </div>
+        `;
+        
+        userCardsContainer.appendChild(card);
+    });
+}
+
+function displayActivityCharts(data) {
+    // This would typically use a charting library like Chart.js
+    // For now, we'll create simple visualizations
+    
+    const usernames = Object.keys(data);
+    const totalEvents = usernames.map(username => data[username].activity_stats?.total_events || 0);
+    
+    // Create simple bar chart for total events
+    const totalEventsChart = document.getElementById('totalEventsChart');
+    totalEventsChart.innerHTML = createSimpleBarChart(usernames, totalEvents, 'Total Events');
+    
+    // Create event types comparison
+    const eventTypesData = {};
+    usernames.forEach(username => {
+        const eventTypes = data[username].activity_stats?.event_types || {};
+        Object.entries(eventTypes).forEach(([type, count]) => {
+            if (!eventTypesData[type]) eventTypesData[type] = {};
+            eventTypesData[type][username] = count;
+        });
+    });
+    
+    const eventTypesChart = document.getElementById('eventTypesChart');
+    eventTypesChart.innerHTML = createEventTypesChart(eventTypesData, usernames);
+    
+    // Create repositories chart
+    const repositoriesChart = document.getElementById('repositoriesChart');
+    repositoriesChart.innerHTML = createRepositoriesChart(data);
+}
+
+function createSimpleBarChart(labels, data, title) {
+    const maxValue = Math.max(...data) || 1; // Prevent division by zero
+    const chartHeight = 200;
+    
+    let chartHTML = `<div class="simple-chart">`;
+    labels.forEach((label, index) => {
+        const height = (data[index] / maxValue) * chartHeight;
+        const percentage = ((data[index] / maxValue) * 100).toFixed(1);
+        
+        chartHTML += `
+            <div class="chart-bar">
+                <div class="bar-fill" style="height: ${height}px; background: linear-gradient(135deg, var(--primary-color), var(--accent-color));"></div>
+                <div class="bar-label">${label}</div>
+                <div class="bar-value">${data[index]} (${percentage}%)</div>
+            </div>
+        `;
+    });
+    chartHTML += `</div>`;
+    
+    return chartHTML;
+}
+
+function createEventTypesChart(eventTypesData, usernames) {
+    let chartHTML = `<div class="event-types-chart">`;
+    
+    Object.entries(eventTypesData).forEach(([eventType, userData]) => {
+        chartHTML += `<div class="event-type-row">`;
+        chartHTML += `<div class="event-type-label">${eventType.replace('Event', '')}</div>`;
+        
+        usernames.forEach(username => {
+            const count = userData[username] || 0;
+            chartHTML += `<div class="event-type-value">${count}</div>`;
+        });
+        
+        chartHTML += `</div>`;
+    });
+    
+    chartHTML += `</div>`;
+    return chartHTML;
+}
+
+function createRepositoriesChart(data) {
+    const usernames = Object.keys(data);
+    let chartHTML = `<div class="repositories-chart">`;
+    
+    usernames.forEach((username, index) => {
+        const repositories = data[username].activity_stats?.repositories || {};
+        const topRepos = Object.entries(repositories)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3);
+        
+        chartHTML += `<div class="user-repos-section">`;
+        chartHTML += `<h4 class="user-repos-title">${username}</h4>`;
+        
+        if (topRepos.length > 0) {
+            chartHTML += `<div class="repos-list">`;
+            topRepos.forEach(([repo, count]) => {
+                chartHTML += `
+                    <div class="repo-item">
+                        <div class="repo-info">
+                            <span class="repo-name">${repo.split('/')[1] || repo}</span>
+                            <span class="repo-count">${count} events</span>
+                        </div>
+                        <div class="repo-bar" style="width: ${Math.min((count / Math.max(...topRepos.map(r => r[1]))) * 100, 100)}%"></div>
+                    </div>
+                `;
+            });
+            chartHTML += `</div>`;
+        } else {
+            chartHTML += `<p class="no-repos">No repository data available</p>`;
+        }
+        
+        chartHTML += `</div>`;
+    });
+    
+    chartHTML += `</div>`;
+    return chartHTML;
+}
+
+function displayDetailedStats(data) {
+    const statsContainer = document.getElementById('detailedStats');
+    statsContainer.innerHTML = '';
+    
+    Object.entries(data).forEach(([username, userData]) => {
+        const stats = userData.activity_stats || {};
+        
+        const statsCard = document.createElement('div');
+        statsCard.className = 'stats-card';
+        statsCard.innerHTML = `
+            <h3 class="stats-card-title">${username}</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Most Active Hour</span>
+                    <span class="stat-value">${stats.activity_by_hour ? Object.entries(stats.activity_by_hour).sort((a, b) => b[1] - a[1])[0]?.[0] + ':00' : 'N/A'}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Most Active Day</span>
+                    <span class="stat-value">${stats.activity_by_day ? Object.entries(stats.activity_by_day).sort((a, b) => b[1] - a[1])[0]?.[0] : 'N/A'}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Top Repository</span>
+                    <span class="stat-value">${stats.repositories ? Object.entries(stats.repositories).sort((a, b) => b[1] - a[1])[0]?.[0] : 'N/A'}</span>
+                </div>
+            </div>
+        `;
+        
+        statsContainer.appendChild(statsCard);
+    });
+}
+
+function displayTimelineComparison(data) {
+    const timelineContainer = document.getElementById('timelineComparison');
+    const filter = document.getElementById('timelineFilter').value;
+    timelineContainer.innerHTML = '';
+    
+    // Create a combined timeline of all users
+    const allEvents = [];
+    Object.entries(data).forEach(([username, userData]) => {
+        const events = userData.events || [];
+        events.forEach(event => {
+            if (filter === 'all' || event.type === filter) {
+                allEvents.push({
+                    ...event,
+                    username: username
+                });
+            }
+        });
+    });
+    
+    // Sort by date
+    allEvents.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    if (allEvents.length === 0) {
+        timelineContainer.innerHTML = `
+            <div class="empty-timeline">
+                <div class="empty-icon">📭</div>
+                <h3>No events found</h3>
+                <p>Try changing the filter or check if users have recent activity</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Display timeline
+    allEvents.forEach(event => {
+        const timelineItem = document.createElement('div');
+        timelineItem.className = 'timeline-item';
+        timelineItem.innerHTML = `
+            <div class="timeline-marker">
+                <div class="marker-icon">${getEventIcon(event.type)}</div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="username-badge">${event.username}</span>
+                    <span class="event-type">${event.type.replace('Event', '')}</span>
+                    <span class="event-time">${formatDate(event.created_at)}</span>
+                </div>
+                <div class="timeline-body">
+                    <p>${generateDescription(event)}</p>
+                </div>
+            </div>
+        `;
+        
+        timelineContainer.appendChild(timelineItem);
+    });
+}
+
+function getEventIcon(eventType) {
+    const icons = {
+        'PushEvent': '🚀',
+        'CreateEvent': '✨',
+        'DeleteEvent': '🗑️',
+        'ForkEvent': '🍴',
+        'WatchEvent': '⭐',
+        'IssuesEvent': '🐛',
+        'IssueCommentEvent': '💬',
+        'PullRequestEvent': '🔀',
+        'PullRequestReviewEvent': '👀',
+        'CommitCommentEvent': '💬',
+        'ReleaseEvent': '🏷️',
+        'GollumEvent': '📝',
+        'MemberEvent': '👥',
+        'PublicEvent': '🌍',
+        'GistEvent': '📄'
+    };
+    return icons[eventType] || '📋';
+}
+
+function generateDescription(event) {
+    const repoName = event.repo?.name?.split('/')?.[1] || 'Unknown repository';
+    const descriptions = {
+        'PushEvent': `Pushed commits to ${repoName}`,
+        'CreateEvent': `Created ${event.payload?.ref_type || 'repository'} in ${repoName}`,
+        'DeleteEvent': `Deleted ${event.payload?.ref_type || 'repository'} in ${repoName}`,
+        'ForkEvent': `Forked ${repoName}`,
+        'WatchEvent': `Starred ${repoName}`,
+        'IssuesEvent': `${event.payload?.action || 'Updated'} an issue in ${repoName}`,
+        'IssueCommentEvent': `Commented on an issue in ${repoName}`,
+        'PullRequestEvent': `${event.payload?.action || 'Updated'} a pull request in ${repoName}`,
+        'PullRequestReviewEvent': `Reviewed a pull request in ${repoName}`,
+        'CommitCommentEvent': `Commented on a commit in ${repoName}`,
+        'ReleaseEvent': `Released ${event.payload?.release?.tag_name || 'version'} in ${repoName}`,
+        'GollumEvent': `Updated wiki pages in ${repoName}`,
+        'MemberEvent': `${event.payload?.action || 'Updated'} member access in ${repoName}`,
+        'PublicEvent': `Made ${repoName} public`,
+        'GistEvent': `${event.payload?.action || 'Updated'} a gist`
+    };
+    return descriptions[event.type] || `Performed ${event.type.toLowerCase().replace('event', '')} in ${repoName}`;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Unknown date';
+    try {
+        const dt = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - dt);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+            return 'Today at ' + dt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        } else if (diffDays === 2) {
+            return 'Yesterday at ' + dt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        } else if (diffDays <= 7) {
+            return `${diffDays - 1} days ago`;
+        } else {
+            return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+    } catch {
+        return dateString;
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+            <span class="notification-message">${message}</span>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+function resetComparison() {
+    document.getElementById('compareForm').style.display = 'block';
+    document.getElementById('compareResults').style.display = 'none';
+    document.getElementById('errorState').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'none';
+    
+    // Reset form
+    for (let i = 1; i <= currentUsers; i++) {
+        const input = document.getElementById(`username${i}`);
+        if (input) input.value = '';
+    }
+}
+</script>
+{% endblock %} 

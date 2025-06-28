@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-06-28T13:29:22.483538",
+  "data": {
+    "user_info": {
+      "login": "addy-dclxvi",
+      "id": 7688126,
+      "node_id": "MDQ6VXNlcjc2ODgxMjY=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7688126?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/addy-dclxvi",
+      "html_url": "https://github.com/addy-dclxvi",
+      "followers_url": "https://api.github.com/users/addy-dclxvi/followers",
+      "following_url": "https://api.github.com/users/addy-dclxvi/following{/other_user}",
+      "gists_url": "https://api.github.com/users/addy-dclxvi/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/addy-dclxvi/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/addy-dclxvi/subscriptions",
+      "organizations_url": "https://api.github.com/users/addy-dclxvi/orgs",
+      "repos_url": "https://api.github.com/users/addy-dclxvi/repos",
+      "events_url": "https://api.github.com/users/addy-dclxvi/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/addy-dclxvi/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false,
+      "name": "Addy",
+      "company": null,
+      "blog": "https://addy-dclxvi.github.io",
+      "location": "Anywhere I Roam, Where I Lay My Head Is Home.",
+      "email": null,
+      "hireable": true,
+      "bio": "Accountant (Full Time), Advertising (Freelance), Metal Enthusiast, Linux Enthusiast, ThinkPad Enthusiast, Cat Lover, Not a Programmer.",
+      "twitter_username": null,
+      "public_repos": 17,
+      "public_gists": 5,
+      "followers": 671,
+      "following": 39,
+      "created_at": "2014-05-24T12:14:31Z",
+      "updated_at": "2024-09-17T11:55:22Z"
+    },
+    "events": []
+  }
+}

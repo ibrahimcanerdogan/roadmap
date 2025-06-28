@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}Trending GitHub Users{% endblock %}
+
+{% block content %}
+<div class="trending-page">
+    <!-- Modern Hero Section -->
+    <div class="trending-hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-icon">🔥</span>
+                    Trending GitHub Users
+                </h1>
+                <p class="hero-subtitle">Discover popular developers and explore their coding activity patterns</p>
+                <div class="hero-stats">
+                    <div class="stat-badge">
+                        <span class="stat-number">{{ trending_users|length }}</span>
+                        <span class="stat-label">Trending Users</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span class="stat-number">📊</span>
+                        <span class="stat-label">Activity Analysis</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span class="stat-number">🔍</span>
+                        <span class="stat-label">Deep Insights</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trending Users Section -->
+    <div class="trending-users-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-icon">👥</span>
+                    Popular Developers
+                </h2>
+                <p class="section-description">Explore trending GitHub users and their recent contributions</p>
+            </div>
+            
+            <div class="trending-grid">
+                {% for username in trending_users %}
+                <div class="trending-user-card" data-username="{{ username }}">
+                    <div class="card-header">
+                        <div class="user-avatar-container">
+                            <img src="https://github.com/{{ username }}.png" alt="{{ username }}" 
+                                 class="user-avatar" 
+                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>'">
+                            <div class="avatar-status"></div>
+                        </div>
+                        <div class="user-info">
+                            <h3 class="user-name" title="Click to copy username">{{ username }}</h3>
+                            <p class="user-handle">@{{ username }}</p>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn copy-btn" title="Copy username" onclick="copyUsername('{{ username }}')">
+                                <span class="action-icon">📋</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">📁</div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="repos-{{ username }}">...</span>
+                                <span class="stat-label">Repositories</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="followers-{{ username }}">...</span>
+                                <span class="stat-label">Followers</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-actions-main">
+                        <a href="{{ url_for('main.user_activity', username=username) }}" class="action-btn-primary">
+                            <span class="btn-icon">📊</span>
+                            <span class="btn-text">View Activity</span>
+                        </a>
+                        <a href="https://github.com/{{ username }}" target="_blank" class="action-btn-secondary">
+                            <span class="btn-icon">🐙</span>
+                            <span class="btn-text">GitHub</span>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Compare Section -->
+    <div class="quick-compare-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-icon">⚡</span>
+                    Quick Compare
+                </h2>
+                <p class="section-description">Select multiple users to compare their activity patterns and contributions</p>
+            </div>
+            
+            <div class="compare-container">
+                <div class="compare-controls">
+                    <div class="control-group">
+                        <button type="button" class="control-btn select-all-btn" onclick="selectAllUsers()">
+                            <span class="control-icon">✅</span>
+                            <span class="control-text">Select All</span>
+                        </button>
+                        <button type="button" class="control-btn clear-btn" onclick="clearSelection()">
+                            <span class="control-icon">🗑️</span>
+                            <span class="control-text">Clear All</span>
+                        </button>
+                    </div>
+                    <div class="selection-info">
+                        <span class="selected-count" id="selectedCount">0</span>
+                        <span class="selected-label">users selected</span>
+                    </div>
+                </div>
+                
+                <div class="user-selection-grid">
+                    {% for username in trending_users %}
+                    <div class="user-selection-item">
+                        <input type="checkbox" id="select-{{ username }}" class="user-checkbox" value="{{ username }}">
+                        <label for="select-{{ username }}" class="user-selection-label">
+                            <div class="selection-avatar">
+                                <img src="https://github.com/{{ username }}.png" alt="{{ username }}" 
+                                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>'">
+                                <div class="selection-indicator"></div>
+                            </div>
+                            <span class="selection-name">{{ username }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="compare-actions">
+                    <button type="button" class="compare-btn" id="compareBtn" onclick="compareSelectedUsers()" disabled>
+                        <span class="btn-icon">📊</span>
+                        <span class="btn-text">Compare Selected Users</span>
+                        <span class="btn-count" id="compareCount">(0)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Load user stats for trending users
+document.addEventListener('DOMContentLoaded', function() {
+    loadUserStats();
+    initializeCompareSelection();
+    initializeCardInteractions();
+});
+
+async function loadUserStats() {
+    const usernames = JSON.parse('{{ trending_users | tojson | safe }}');
+    
+    for (const username of usernames) {
+        try {
+            const response = await fetch(`/api/user/${username}`);
+            const data = await response.json();
+            
+            if (data.user_info) {
+                updateUserStats(username, data.user_info);
+            }
+        } catch (error) {
+            console.error(`Error loading stats for ${username}:`, error);
+            updateUserStats(username, { public_repos: 'N/A', followers: 'N/A' });
+        }
+    }
+}
+
+function updateUserStats(username, userInfo) {
+    const reposElement = document.getElementById(`repos-${username}`);
+    const followersElement = document.getElementById(`followers-${username}`);
+    
+    if (reposElement) {
+        reposElement.textContent = userInfo.public_repos || 'N/A';
+    }
+    
+    if (followersElement) {
+        followersElement.textContent = userInfo.followers || 'N/A';
+    }
+}
+
+function initializeCompareSelection() {
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateCompareButton();
+            updateSelectionInfo();
+        });
+    });
+}
+
+function updateCompareButton() {
+    const selectedUsers = getSelectedUsers();
+    const compareBtn = document.getElementById('compareBtn');
+    const compareCount = document.getElementById('compareCount');
+    
+    if (selectedUsers.length >= 2) {
+        compareBtn.disabled = false;
+        compareBtn.classList.add('active');
+    } else {
+        compareBtn.disabled = true;
+        compareBtn.classList.remove('active');
+    }
+    
+    compareCount.textContent = `(${selectedUsers.length})`;
+}
+
+function updateSelectionInfo() {
+    const selectedUsers = getSelectedUsers();
+    const selectedCount = document.getElementById('selectedCount');
+    selectedCount.textContent = selectedUsers.length;
+}
+
+function getSelectedUsers() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+function selectAllUsers() {
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    updateCompareButton();
+    updateSelectionInfo();
+}
+
+function clearSelection() {
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    updateCompareButton();
+    updateSelectionInfo();
+}
+
+async function compareSelectedUsers() {
+    const selectedUsers = getSelectedUsers();
+    
+    if (selectedUsers.length < 2) {
+        showNotification('Please select at least 2 users to compare', 'warning');
+        return;
+    }
+    
+    if (selectedUsers.length > 5) {
+        showNotification('Maximum 5 users can be compared', 'warning');
+        return;
+    }
+    
+    // Show loading state
+    const compareBtn = document.getElementById('compareBtn');
+    const originalText = compareBtn.innerHTML;
+    compareBtn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-text">Preparing comparison...</span>';
+    compareBtn.disabled = true;
+    
+    // Redirect to compare page with selected users
+    const compareUrl = new URL('/compare', window.location.origin);
+    compareUrl.searchParams.set('users', selectedUsers.join(','));
+    window.location.href = compareUrl.toString();
+}
+
+function initializeCardInteractions() {
+    // Add hover effects for user cards
+    document.querySelectorAll('.trending-user-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.classList.add('hovered');
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.classList.remove('hovered');
+        });
+    });
+}
+
+function copyUsername(username) {
+    navigator.clipboard.writeText(username).then(() => {
+        showNotification(`Copied "${username}" to clipboard!`, 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        copyToClipboardFallback(username);
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+            <span class="notification-message">${message}</span>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+function copyToClipboardFallback(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showNotification(`Copied "${text}" to clipboard!`, 'success');
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+    }
+    
+    document.body.removeChild(textArea);
+}
+</script>
+{% endblock %} 

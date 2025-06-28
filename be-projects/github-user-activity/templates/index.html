@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}GitHub User Activity - Home{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Discover GitHub Activity
+                <span class="title-accent">🐙</span>
+            </h1>
+            <p class="hero-subtitle">
+                Explore recent activity of any GitHub user. See their commits, issues, pull requests, and more in a beautiful timeline.
+            </p>
+            
+            <!-- Search Form -->
+            <div class="search-section">
+                <form method="POST" class="search-form" id="searchForm">
+                    <div class="search-input-group">
+                        <div class="input-wrapper">
+                            <span class="input-icon">👤</span>
+                            <input 
+                                type="text" 
+                                name="username" 
+                                id="username"
+                                placeholder="Enter GitHub username (e.g., torvalds)"
+                                class="search-input"
+                                required
+                                autocomplete="off"
+                                autofocus
+                            >
+                        </div>
+                        <button type="submit" class="search-button" id="searchButton">
+                            <span class="button-text">Search Activity</span>
+                            <span class="button-icon">🔍</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Popular Users -->
+            <div class="popular-users">
+                <p class="popular-label">Try these popular users:</p>
+                <div class="user-suggestions">
+                    <button class="user-suggestion" onclick="setUsername('torvalds')">torvalds</button>
+                    <button class="user-suggestion" onclick="setUsername('gvanrossum')">gvanrossum</button>
+                    <button class="user-suggestion" onclick="setUsername('antirez')">antirez</button>
+                    <button class="user-suggestion" onclick="setUsername('kamranahmedse')">kamranahmedse</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hero Image/Illustration -->
+        <div class="hero-visual">
+            <div class="activity-preview">
+                <div class="preview-header">
+                    <div class="preview-avatar">👤</div>
+                    <div class="preview-info">
+                        <div class="preview-username">username</div>
+                        <div class="preview-status">Recent Activity</div>
+                    </div>
+                </div>
+                <div class="preview-activities">
+                    <div class="preview-activity">
+                        <span class="activity-icon">🚀</span>
+                        <span class="activity-text">Pushed commits to repository</span>
+                    </div>
+                    <div class="preview-activity">
+                        <span class="activity-icon">🐛</span>
+                        <span class="activity-text">Opened an issue</span>
+                    </div>
+                    <div class="preview-activity">
+                        <span class="activity-icon">⭐</span>
+                        <span class="activity-text">Starred a repository</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+    <div class="features-container">
+        <h2 class="features-title">What you can discover</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3 class="feature-title">Push Events</h3>
+                <p class="feature-description">See recent commits and code pushes to repositories</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🐛</div>
+                <h3 class="feature-title">Issues & PRs</h3>
+                <p class="feature-description">Track issue creation and pull request activities</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⭐</div>
+                <h3 class="feature-title">Stars & Forks</h3>
+                <p class="feature-description">Discover what repositories they're interested in</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏷️</div>
+                <h3 class="feature-title">Releases</h3>
+                <p class="feature-description">View recent releases and version tags</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function setUsername(username) {
+    document.getElementById('username').value = username;
+    document.getElementById('searchForm').submit();
+}
+
+// Add loading state to search button
+document.getElementById('searchForm').addEventListener('submit', function() {
+    const button = document.getElementById('searchButton');
+    const buttonText = button.querySelector('.button-text');
+    const originalText = buttonText.textContent;
+    
+    button.disabled = true;
+    buttonText.textContent = 'Searching...';
+    
+    // Re-enable after a delay (in case of errors)
+    setTimeout(() => {
+        button.disabled = false;
+        buttonText.textContent = originalText;
+    }, 5000);
+});
+</script>
+{% endblock %} 
